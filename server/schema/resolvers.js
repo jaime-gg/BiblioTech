@@ -26,7 +26,49 @@ const resolvers = {
     },
 
     Mutation: {
+        addUser: async (parent, args) => {
+            const user = await User.create(args);
+            const token = signToken(user);
 
+            // LOGIN NEW USER WITH NEW TOKEN
+            return { token, user };
+        },
+
+        login: async (parent, { email, password }) => {
+            const user = await User.findOne({ email });
+            // IF THE EMAIL IS NOT RECOGNIZED THROW ERROR
+            if (!user) {
+                throw new AuthenticationError('Incorrect credentials');
+            }
+
+            const correctPw = await user.isCorrectPassword(password);
+
+            // IF PASSWORD IS INCORRECT THROW ERROR
+            if (!correctPw) {
+                throw new AuthenticationError('Incorrect credentials');
+            }
+
+            const token = signToken(user);
+            return { token, user };
+        },
+
+        // USE 'CONTEXT' TO PULL USER DATA
+        saveBook: async (parent, { bookData }, context) => {
+            if (context.user) {
+                // IF LOGGED IN PUSH TO SAVED BOOKS
+                const updatedUser = await User.findByIdAndUpdate(
+                    { _id: context.user._id },
+                    { $push: { savedBooks: bookData } },
+                    { new: true }
+                );
+                return updatedUser;
+            }
+            throw new AuthenticationError('You need to be logged in!');
+        },
+
+        removeBook: async (parent, { bookId }, context) => {
+
+        }
     },
 
 };
