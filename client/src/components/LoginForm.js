@@ -33,10 +33,6 @@ const LoginForm = () => {
         variables: { ...userFormData },
       });
 
-      if (!data.ok) {
-        throw new Error('something went wrong!');
-      }
-
       console.log(data);
       Auth.login(data.login.token);
 
