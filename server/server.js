@@ -4,7 +4,7 @@ const { ApolloServer } = require('apollo-server-express');
 
 // IMPORT OUR TYPE-DEFS AND RESOLVERS + AUTH MIDDLEWARE
 const { authMiddleware } = require('./utils/auth');
-const { typeDefs, resolvers } = require('./schemas');
+const { typeDefs, resolvers } = require('./schema');
 const path = require('path');
 const db = require('./config/connection');
 
@@ -42,5 +42,4 @@ app.get('*', (req, res) => {
 // WHEN SET UP CONSOLE LOG THE APPROPRIATE PATHS
 db.once('open', () => {
   app.listen(PORT, () => console.log(`🌍 Now listening on localhost:${PORT}`));
-  console.log(`GraphQL available at http://localhost:${PORT}${server.graphqlPath}`);
 });
