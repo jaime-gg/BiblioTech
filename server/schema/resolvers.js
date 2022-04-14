@@ -17,7 +17,6 @@ const resolvers = {
             if (context.user) {
                 // RETURN NON-SENSITIVE USER DATA 
                 const userData = await User.findOne({ _id: context.user._id }).select('-__v -password');
-
                 return userData;
             }
             // IF USER IS NOT LOGGED IN 
@@ -29,7 +28,6 @@ const resolvers = {
         addUser: async (parent, args) => {
             const user = await User.create(args);
             const token = signToken(user);
-
             // LOGIN NEW USER WITH NEW TOKEN
             return { token, user };
         },
@@ -40,14 +38,12 @@ const resolvers = {
             if (!user) {
                 throw new AuthenticationError('Incorrect credentials');
             }
-
+            // PASSWORD CHECKER
             const correctPw = await user.isCorrectPassword(password);
-
             // IF PASSWORD IS INCORRECT THROW ERROR
             if (!correctPw) {
                 throw new AuthenticationError('Incorrect credentials');
             }
-
             const token = signToken(user);
             return { token, user };
         },
@@ -67,10 +63,18 @@ const resolvers = {
         },
 
         removeBook: async (parent, { bookId }, context) => {
-
-        }
-    },
-
-};
+            if (context.user) {
+                // IF LOGGED IN PULL/DELETE FROM SAVED BOOKS
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: context.user._id },
+                    { $pull: { savedBooks: { bookId } } },
+                    { new: true }
+                );
+                return updatedUser;
+            }
+            throw new AuthenticationError('You need to be logged in!');
+        },
+    }
+}; 
 
 module.exports = resolvers;
